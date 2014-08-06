@@ -1,0 +1,7 @@
+/* ------- custom style sheet ------- */
+.nav-tabs > li > a{
+	cursor:pointer;
+}
+.dropzone{
+	margin-bottom:40px;
+}

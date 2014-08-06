@@ -1,0 +1,240 @@
+<!-- PAGE HEADER-->
+<div class="row">
+	<div class="col-sm-12">
+		<div class="page-header">
+			<!-- STYLER -->
+			<!-- /STYLER -->
+			<!-- BREADCRUMBS -->
+			<ul class="breadcrumb">
+				<li>
+					<i class="fa fa-home"></i>
+					<a href="index.html">Home</a>
+				</li>
+				<li>Route Planner</li>
+			</ul>
+			<!-- /BREADCRUMBS -->
+			<div class="clearfix">
+				<h3 class="content-title pull-left">Route Planner</h3>
+			</div>
+			<div class="description">Plan a batch of jobs from this page</div>
+		</div>
+	</div>
+</div>
+<!-- /PAGE HEADER -->
+<div class="row">
+	<div class="col-md-12">
+		<!-- BOX BORDER-->
+		<div class="box border" id="formWizard">
+			<div class="box-title">
+				<h4><i class="fa fa-map-marker"></i><span class="stepHeader">Step 1 of 3</span></h4>
+			</div>
+			<div class="box-body form">
+				<form role="form" id="wizForm">
+					<div class="wizard-form">
+						<div class="wizard-content" data-hbo-tabs>
+							<ul class="nav nav-pills nav-justified steps">
+								<li>
+									<a href="#add_destination" target="_self" data-toggle="tab" class="wiz-step">
+									<span class="step-number">1</span>
+									<span class="step-name"><i class="fa fa-check"></i> Add Destinations </span>   
+									</a>
+								</li>
+								<li>
+									<a href="#create_route" target="_self" data-toggle="tab" class="wiz-step active">
+									<span class="step-number">2</span>
+									<span class="step-name"><i class="fa fa-check"></i> Create Routes</span>   
+									</a>
+								</li>
+								<li>
+									<a href="#send_drivers" target="_self" data-toggle="tab" class="wiz-step">
+									<span class="step-number">3</span>
+									<span class="step-name"><i class="fa fa-check"></i> Send Routes to Drivers </span>   
+									</a> 
+								</li>
+							</ul>
+							<div id="bar" class="progress progress-striped progress-sm active" role="progressbar">
+								<div class="progress-bar progress-bar-warning"></div>
+							</div>
+							<div class="tab-content">
+								<div class="alert alert-danger display-none">
+									<a class="close" aria-hidden="true" href="#" data-dismiss="alert">×</a>
+									Your form has errors. Please correct them to proceed.
+								</div>
+								<div class="alert alert-success display-none">
+									<a class="close" aria-hidden="true" href="#" data-dismiss="alert">×</a>
+									Your form validation is successful!
+								</div>
+								<div class="tab-pane active" id="add_destination">
+									<div class="col-md-6" ng-if="! dispatching">
+										<!-- BOX BORDER-->
+										<div class="box border">
+											<div class="box-title">
+												<h4><i class="fa fa-map-marker"></i>Enter planning information</h4>	
+											</div>
+											<div class="box-body">
+												<form role="form" >
+													<div class="form-group">
+														<label for="startFrom">Start from</label>
+														<input type="text" class="form-control" id="dest0" placeholder="Enter address" ng-model="startFrom.address" ng-click="initAutocomplete(startFrom, 0)"/>
+													</div>
+													<div class="form-group">
+														<label for="dest">Destination(s)</label>
+														<div class="panel-group" id="accordion">
+														  <div class="panel panel-default" ng-repeat="d in destinations track by $index">
+															 <div class="panel-heading">
+															 	<div class="input-group">
+															      <input type="text" class="form-control" id="dest{{$index+1}}" placeholder="Enter address" ng-model="d.address" ng-click="initAutocomplete(d, $index+1)">
+															      <span class="input-group-btn">
+															        <a class="btn btn-default accordion-toggle" data-toggle="collapse" data-parent="#accordion" ng-href="#collapse{{$index}}" target="_self"><i class="fa fa-edit"></i></a> 
+															      </span>
+															    </div><!-- /input-group -->
+															 </div>
+															 <div id="collapse{{$index}}" class="panel-collapse collapse" style="height: auto;">
+																<div class="panel-body"> 
+																	  <div class="form-group" ng-repeat="f in config.CUSTOM_FIELDS | filter:'input' track by $index">
+																	    <label>{{f.name}}</label>
+																	    <input type="text" class="form-control" ng-model="d.fields[f.name]">
+																	  </div>
+																	  <div class="form-group" ng-repeat="f in config.CUSTOM_FIELDS | filter:'textarea' track by $index">
+																	    <label>{{f.name}}</label>
+																	    <textarea class="form-control" rows="3" ng-model="d.fields[f.name]"></textarea>
+																	  </div>
+																</div>
+															 </div>
+														  </div>												  
+													   </div>
+												</div>
+													<div class="form-group">
+														<button type="button" class="btn btn-success" ng-click="addDestination()"><i class="fa fa-plus"> </i> Add destination</button>
+														<button type="button" class="btn btn-danger" ng-click="initController()"><i class="fa fa-ban"> </i> Reset destinations</button>
+													</div>
+												</form>
+											</div>
+										</div>
+										<!-- /BOX BORDER -->
+										<form action="ws/upload_file.php" dropzone class="dropzone">
+											<div class="fallback">
+												<input name="file" type="file" multiple="" />
+											</div>
+										</form>
+									</div>
+									<div ng-class="{'col-md-12': dispatching, 'col-md-6': !dispatching}" ng-hide="creatingRoutes">
+										<div class="box border">
+											<div class="box-title">
+												<h4><i class="fa fa-map-marker"></i>Destinations map</h4>	
+											</div>
+											<div class="box-body" >
+												<div id="mapCanvas_small" class="gmaps" style="position: relative; overflow: hidden;"></div>
+												<div class="checkbox">
+													<label><input type="checkbox" ng-click="toggleTraffic()" > Show live traffic information</label>
+												</div>
+											</div>
+										</div>									
+									</div>
+
+								</div>
+								<div class="tab-pane" id="create_route">
+
+
+									<div ng-class="{'col-md-12': dispatching, 'col-md-6': !dispatching}" ng-hide="creatingRoutes">
+										<div class="box border">
+											<div class="box-title">
+												<h4><i class="fa fa-map-marker"></i>Destinations map</h4>	
+											</div>
+											<div class="box-body" >
+												<form role="form" ng-if="dispatching">
+													<div class="form-group">
+														<div><label>Select a driver then click on destinations to assign to that driver:</label></div>
+														<div class="btn-group" style="float: none;">													
+															<button class="btn btn-default" ng-repeat="d in drivers" ng-click="selectDriver($index, d)">
+																<img ng-src="img/map/pin{{$index}}.png" style="height: 25px"/> {{d.NAME}}
+															</button>
+														</div>
+
+													</div>
+												</form>
+												<div id="mapCanvas" class="gmaps" style="position: relative; overflow: hidden;"></div>
+												<div class="checkbox">
+													<label><input type="checkbox" ng-click="toggleTraffic()" > Show live traffic information</label>
+												</div>
+												<div class="form-group" ng-if="dispatching">
+													<!--<button type="button" class="btn btn-primary" ng-click="createRoutes()"><i class="fa fa-road"> </i> Create routes</button>-->
+													<button type="button" class="btn btn-danger" ng-click="initController()"><i class="fa fa-ban"> </i> Reset destinations</button>
+												</div>
+
+											</div>
+										</div>								
+									</div>
+
+							 	</div>
+								<div class="tab-pane" id="send_drivers">
+
+
+									<div class="row" ng-show="creatingRoutes">
+										<div class="col-md-12" ng-if="creatingRoutes">
+											<div class="box border">
+												<div class="box-title">
+													<h4><i class="fa fa-map-marker"></i>Routes planned!</h4>	
+												</div>
+												<div class="box-body">
+												   <div class="panel-body">
+										   				<div class="form-group" >
+															<!--<button type="button" class="btn btn-primary" ng-click="sendRoutes()"><i class="fa fa-road"> </i> Send routes to drivers</button>-->
+															<button type="button" class="btn btn-danger" ng-click="initController()"><i class="fa fa-ban"> </i> Reset destinations</button>
+														</div>
+										   				<p>Click on the tabs to see the routes created for your drivers:</p>
+										   				<tabset>
+														    <tab ng-repeat="d in getDriversWithDestinations()" heading="{{d.NAME}}" active="d.active">
+														    	<div class="divide-10"></div>
+														    	<div id="mapCanvas{{d.ID}}" class="gmaps" style="position: relative; overflow: hidden;"></div>
+														    	<div class="row">
+														    		<div class="col-md-12" id="directions-panel{{d.ID}}"></div>
+														    	</div>
+														    </tab>
+														</tabset>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>									
+
+
+								</div>
+							</div>
+						</div>
+						<div class="wizard-buttons">
+						  <div class="row">
+							 <div class="col-md-12">
+								<div class="col-md-offset-3 col-md-9">
+								   <a href="javascript:;" ng-click="goto_step1()" ng-show="!step_1 && step_2" class="btn btn-default prevBtn">
+									<i class="fa fa-arrow-circle-left"></i> Go to add destination section 
+								   </a>
+								   <a href="javascript:;" ng-click="goto_step2()" ng-show="!step_1 && !step_2 && step_3" class="btn btn-default prevBtn">
+									<i class="fa fa-arrow-circle-left"></i> Go to Create Routes section 
+								   </a>
+
+								   <a href="javascript:;" class="btn btn-primary nextBtn" ng-show="step_1" ng-click="assignRoutes()">
+									Assign to drivers & Continue <i class="fa fa-arrow-circle-right"></i>
+								   </a>
+								   <a href="javascript:;" class="btn btn-primary nextBtn" ng-show="!step_1 && step_2" ng-click="createRoutes()">
+									Create Routes & Continue <i class="fa fa-arrow-circle-right"></i>
+								   </a>
+								   <!--<a href="javascript:;" class="btn btn-success submitBtn" ng-click="sendRoutes()">
+									Send routes to drivers & Submit <i class="fa fa-arrow-circle-right"></i></a>-->
+									<button type="button" class="btn btn-success" ng-show="!step_1 && !step_2 && step_3" ng-click="sendRoutes()"><i class="fa fa-road"> </i> Send routes to drivers</button>
+								</div>
+
+							 </div>
+						  </div>
+					   </div>						
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+jQuery(document).ready(function(){
+	FormWizard.init();
+});
+</script>

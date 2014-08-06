@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Test distance API</title>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+     <script type="text/javascript" src="StyledMarker.js"></script>
+    <script type="text/javascript">
+
+      var map;
+	  var info;
+	  var bounds = new google.maps.LatLngBounds();
+	  var points = [{lat:37.34172542,lng:-122.4497796},{lat:37.02438671,lng:-121.46348159},{lat:37.38629344,lng:-122.52543644},{lat:37.69364576,lng:-121.61546945},{lat:37.43774515,lng:-122.4921351},{lat:37.1184662,lng:-121.81525661},{lat:37.37723037,lng:-121.52723418},{lat:37.20141217,lng:-122.47925483},{lat:37.77376604,lng:-121.71318206},{lat:37.29583271,lng:-122.2840542},{lat:36.82708232,lng:-121.84705962},{lat:37.45634827,lng:-121.45720211},{lat:37.37964288,lng:-122.00535534},{lat:37.25119804,lng:-122.56316761},{lat:37.57119231,lng:-121.48618562},{lat:37.19373577,lng:-121.62427104},{lat:37.19942002,lng:-121.25342702},{lat:37.09781746,lng:-122.12206294},{lat:37.46547049,lng:-122.05561434},{lat:36.96886661,lng:-121.90509884}];
+
+	  
+      function initialize() {
+        var mapDiv = document.getElementById('map-canvas');
+        map = new google.maps.Map(mapDiv, {
+          center: new google.maps.LatLng(38.630282,-90.197857),
+          zoom: 6,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+		    info = new google.maps.InfoWindow();
+		
+        google.maps.event.addListenerOnce(map, 'tilesloaded', addMarkers);      
+      }
+	  
+	  function addInfoWindow(marker, content){
+	  	google.maps.event.addListener(marker, 'click', function() {
+			info.setPosition(marker.getPosition());
+			info.setContent(content);
+			info.open(map);
+		});
+	  }
+	  
+	  function addMarker(latlng, text){
+  		var marker = new StyledMarker({
+  			styleIcon:new StyledIcon(StyledIconTypes.MARKER,{color:"00ff00",text: text}),
+              position: latlng,
+              map: map            
+          });
+  		addInfoWindow(marker, text + " "+latlng.lat()+ " "+latlng.lng());
+  		bounds.extend(latlng);
+	  }
+      
+    function addMarkers() {
+    	for (var p in points) {
+    		addMarker(new google.maps.LatLng(points[p].lat, points[p].lng), p);
+    	}		  		  
+		  map.fitBounds(bounds);
+	  }  
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+  <body style="font-family: Arial; border: 0 none;">
+    <div id="map-canvas" style="width: 550px; height: 450px"></div>
+  </body>
+</html>
